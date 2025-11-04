@@ -3224,8 +3224,9 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                         break;
                     case 2:
                         if (protocol >= ProtocolInfo.v1_16_0) {
-                            this.unverifiedUsername = TextFormat.clean(loginPacket.username)
-                                    .replace(" ", "_");
+                            this.unverifiedUsername = Optional.ofNullable(TextFormat.clean(loginPacket.username))
+                                    .map(s -> s.replace(" ", "_"))
+                                    .orElse(null);
                         } else {
                             // There are compatibility issues in <1.16, ignore
                             this.unverifiedUsername = TextFormat.clean(loginPacket.username);
@@ -3300,7 +3301,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 this.username = this.unverifiedUsername;
                 this.unverifiedUsername = null;
                 this.displayName = this.username;
-                this.iusername = this.username.toLowerCase(Locale.ROOT);
+                this.iusername = Optional.ofNullable(this.username).map(s -> s.toLowerCase(Locale.ROOT)).orElse(null);
                 this.setDataProperty(new StringEntityData(DATA_NAMETAG, this.username), false);
 
                 this.server.getLogger().debug("Name: " + this.username + " Protocol: " + this.protocol + " Version: " + this.version);
@@ -3309,6 +3310,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
                 this.uuid = loginPacket.clientUUID;
                 this.rawUUID = Binary.writeUUID(this.uuid);
+                this.minecraftId = loginPacket.minecraftId;
 
                 boolean valid = true;
                 int len = loginPacket.username.length();
